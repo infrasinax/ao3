@@ -1,5 +1,19 @@
 #/usr/bin/env python
 # encoding: utf-8
+# -*- coding: utf-8 -*-
+
+##########################################################################################
+# -------------------------------------------------------------------------------------  #
+#     APLICAÇÃO PARA A CRIAÇÃO DE CONTAS E CONTÊINERES DOCKER PARA CLIENTES AO3 BPMS     #
+# -------------------------------------------------------------------------------------  #
+# Autor:      Cristiano de Morais Lima                                                   #
+# E-mail:     cristiano.lima@sinax.com.br                                                #
+# Data:       11 de Abril de 2018                                                        #
+# Versão:     1.0                                                                        #
+# Linguagem:  Python 2.0                                                                 #
+# Arquivo:    crt_yml.py                                                                 #
+#                                                                                        #
+##########################################################################################
 
 #importação de módulos
 from constantes import *
@@ -11,7 +25,7 @@ def verifica_caminho():
     caminho = "/opt/docker/app/"+str(globais[1])
     if not os.path.exists(caminho):
         os.makedirs(caminho)
-        print("O caminho "+caminho+" foi criado com sucesso")
+#        print("O caminho "+caminho+" foi criado com sucesso")
         return False
     else:
 

@@ -1,5 +1,19 @@
-#/usr/bin/env python
+# /usr/bin/env python
 # encoding: utf-8
+# -*- coding: utf-8 -*-
+
+##########################################################################################
+# -------------------------------------------------------------------------------------  #
+#     APLICAÇÃO PARA A CRIAÇÃO DE CONTAS E CONTÊINERES DOCKER PARA CLIENTES AO3 BPMS     #
+# -------------------------------------------------------------------------------------  #
+# Autor:      Cristiano de Morais Lima                                                   #
+# E-mail:     cristiano.lima@sinax.com.br                                                #
+# Data:       11 de Abril de 2018                                                        #
+# Versão:     1.0                                                                        #
+# Linguagem:  Python 2.0                                                                 #
+# Arquivo:    classes.py                                                                 #
+#                                                                                        #
+##########################################################################################
 
 #importação de módulos
 import os, sys, pwd
@@ -32,7 +46,6 @@ def createUser():
     if Sudo is None:
         if create_pwd():
             isFinish = os.system("sudo useradd -p '" + str(globais[2]) + "' -s "+ "/bin/bash "+ "-d "+ "/home/" + globais[1].lower() + " -m "+ " -c \""+ globais[0] +"\" " + globais[1].lower())
-
             if isFinish == 0:
                 globais[3] = getpwnam(str(globais[1])).pw_uid
                 if createFolderCargas():
@@ -101,7 +114,8 @@ def checkUser():
 def create_user_database():
     if check_user_database() == False:
         try:
-            conn = psycopg2.connect(host='localhost',database='postgres',user='ao3_db_user',password='8EMHf4Mk')
+            #conn = psycopg2.connect(host='localhost',database='postgres',user='ao3_db_user',password='8EMHf4Mk')
+            conn = psycopg2.connect(host="'"+str(globais[7])+"'",database='postgres',user='ao3_db_user',password='8EMHf4Mk')
             conn.autocommit = True
             cur = conn.cursor()
             
@@ -125,12 +139,12 @@ def create_user_database():
 #Verifica se o usuário tem permissão na base de dados.
 def check_user_database():
     try:
-        conn = psycopg2.connect(host='localhost',database='postgres',user='ao3_db_user',password='8EMHf4Mk')
+        #conn = psycopg2.connect(host='localhost',database='postgres',user='ao3_db_user',password='8EMHf4Mk')
+        conn = psycopg2.connect(host="'"+str(globais[7])+"'",database='postgres',user='ao3_db_user',password='8EMHf4Mk')
         conn.autocommit = True
         cur = conn.cursor()
         cur.execute("SELECT rolname FROM pg_roles WHERE rolname='"+globais[1]+"'")
         row  = cur.fetchone()
-
         if row == None:
             return False
         else:
@@ -140,21 +154,27 @@ def check_user_database():
 
 
 #Função de Manipulação do Banco de dados para controle de portas em uso do pgd
-def portcontrol(sqlQuery,Insere):
+def portcontrol(sqlQuery,Insere,RetornaID):
+    
+    pconn = psycopg2.connect(host='10.51.1.14', database='ao3_bpms_cfg', user='ao3_user', password='48C0bIV3ho3I')
+
     try:
-        pconn = psycopg2.connect(host='10.51.1.14', database='ao3_bpms_cfg', user='ao3_user', password='48C0bIV3ho3I')
         pcur = pconn.cursor()
 
         #Se o parâmetro "Insere" é verdadeiro retorna o resultado da inserção.
         if Insere == True:
             pcur.execute(sqlQuery)
-            pexec = pcur.fetchone()
+            if RetornaID:
+                pexec = pcur.fetchone()
+            else:
+                pexec = pcur.fetchall()
             pconn.commit()
 
             if not pexec:
                 raise psycopg2.Error("Não foi possível executar a query."+'\n'+"Por favor, verifique!")
             else:
-                globais[24] = str(pexec[0])
+                if RetornaID:
+                    globais[24] = str(pexec[0])
                 pcur.close()
                 pconn.close()
                 return True
@@ -162,7 +182,7 @@ def portcontrol(sqlQuery,Insere):
         else:
 
             curport="SELECT servidor_id,porta_numero FROM servidores INNER JOIN portas ON servidor_id = portas.porta_servidor_id\
-                    WHERE servidor_ip = '"+globais[7]+"' AND servidor_database = 'False'  ORDER BY servidor_id,porta_numero;"
+                    WHERE servidor_ip = '"+globais[7]+"' AND servidor_database = 'False'  ORDER BY porta_numero DESC;"
 
             pcur.execute(curport)
             pexec=pcur.fetchall()
@@ -196,6 +216,7 @@ def portcontrol(sqlQuery,Insere):
         print("MOTIVO:"+str(error))
         sys.exit(1)
         return False
+
     finally:
         if pconn is not None:
             pconn.close()

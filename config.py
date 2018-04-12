@@ -2,11 +2,24 @@
 # -*- encoding: utf-8 -*-
 # -*- coding: utf-8 -*-
 
+##########################################################################################
+#     APLICAÇÃO PARA A CRIAÇÃO DE CONTAS E CONTÊINERES DOCKER PARA CLIENTES AO3 BPMS     #
+#                                                                                        #
+# Autor:      Cristiano de Morais Lima                                                   #
+# E-mail:     cristiano.lima@sinax.com.br                                                #
+# Data:       11 de Abril de 2018                                                        #
+# Versão:     1.0                                                                        #
+# Linguagem:  Python 2.0                                                                 #
+# Arquivo:    config.py                                                                  #
+#                                                                                        #
+##########################################################################################
+
 import locale, os, sys, dialog, time, crypt, getpass, spwd, socket
 from pwd import getpwnam
 from classes import *
 from constantes import *
 from crt_yml import *
+
 try:
     from dialog import Dialog
 except:
@@ -64,7 +77,7 @@ def SelectSize():
         if int(value) == 3:
             globais[14] = 8
             globais[15] = 8
-            globais[16] = 1.2
+            globais[16] = 1
             globais[17] = 3
             globais[18] = 12
 
@@ -180,10 +193,14 @@ def PostgresDatabase():
 
     if globais[19] == "snx-apps-prod":
         suggesthost = "10.51.1.12"
+        globais[23] = 3
         globais[25] = "Produção"
+        globais[26] = 1
     else:
         suggesthost = "10.51.1.13"
+        globais[23] = 4
         globais[25] = "Homologação"
+        globais[26] = 2
         
     elements = [("Servidor: ",1,1,suggesthost,1,11,14,12)]
     code, hostval = d.form("Informe o endereco IP do servidor de banco de dados.",elements, height=10, width=40)
@@ -232,7 +249,7 @@ def MongoDatabase():
 
 def Lastinfo():
     items = 0
-    AvailablePort = portcontrol("",False)
+    AvailablePort = portcontrol("",False,False)
 
     elements = [("Versao do Maven: ",1,1,"latest",1,24,20,20),("Porta: ",2,1,str(AvailablePort[1]),2,24,20,20),("Time Zone: ",3,1,"America\Sao_Paulo",3,24,20,20)]
    
@@ -252,7 +269,6 @@ def Lastinfo():
             try:
                 int(values[1])
                 globais[5] = str(int(values[1]))
-                globais[23] = AvailablePort[0]
                 items += 1
             except ValueError as e:
                 d.infobox("Porta "+values[1]+" invalida."+'\n'+"Por favor, verifique.",height=6, width=60)
@@ -295,7 +311,7 @@ def Confirmacao():
             ("Java Mem 2: ",15,1,str(globais[15])+" GB",15,16,24,20,0x2),("Java Nursery: ",16,1,str(globais[16]),16,16,24,20,0x2),\
             ("CPU Limit: ",17,1,str(globais[17])+" Cores",17,16,24,20,0x2),("RAM Limit: ",18,1,str(globais[18])+" GB",18,16,24,20,0x2)]
  
-    code, values = d.mixedform("Os dados abaixo estao corretos?\nDeseja prosseguir?",elements, height=40, width=50,form_height=45)
+    code, values = d.mixedform("Os dados abaixo estao corretos?\nDeseja prosseguir?",elements, height=40, width=50,form_height=50)
 
     if code == d.OK:
         Configuracao()
@@ -309,60 +325,65 @@ def Configuracao():
     d.gauge_start(text="Aguarde a finalizacao da configuracao...",height=10,width=50,percent=0)
 
     if globais[1] != "" and str(globais[2]) != "": #and globais[21] == 1:
-        d.gauge_update(1, "Criando usuario linux")
+        d.gauge_update(1, "Criando usuario linux",update_text=True)
         
-        #if createUser():
-        #    d.gauge_update(10, "Usuario Linux criado")
-
+        if createUser():
+            d.gauge_update(10, "Usuario Linux criado",update_text=True)
+        
         InsertClienteQuery = "INSERT INTO clientes (cliente_nome, cliente_servidor_id, cliente_servico) VALUES ('"+str(globais[1])+"',"+str(globais[23])+",'"+str(globais[25])+"') RETURNING cliente_id;"
+        
+        d.gauge_update(7, "Atualizado o banco de dados de controle",update_text=True)
 
-        d.gauge_update(7, "Atualizado o banco de dados de controle")
-
-        if portcontrol(InsertClienteQuery,True):
-            d.gauge_update(10, "Atualizado o banco de dados de controle")
-
+        if portcontrol(InsertClienteQuery,True,True):
+            d.gauge_update(10, "Atualizado o banco de dados de controle",update_text=True)
+            
         InsertCfgQuery = "INSERT INTO configuracao (config_cliente_id,config_servidor_id,config_porta,config_local_user_id,\
                 config_db_username,config_dbhost_id,config_app_version,config_db_pwd,config_pgd_dbname,config_nxp_dbname,\
                 config_app_dbname,config_mongo_host,config_mongo_dbname,config_java_xmssize1,config_java_xmssize2,\
                 config_java_xmssize3,config_pgd_home,config_timezone,config_volumes,config_cpus_number,config_mem_limit,\
-                config_network_name)VALUES('"+globais[24]+"','"+globais[7]+"','"+globais[5]+"','"+globais[3]+"','"+globais[1]+"',\
-                '"+globais[23]+"','"+globais[2]+"','"+globais[8]+"','"+globais[9]+"','"+globais[10]+"','"+globais[11]+"','"+globais[12]+"',\
-                '"+globais[14]+"','"+globais[15]+"','"+globais[16]+"','/opt/docker/app/"+globais[1]+"','"+globais[13]+"',\
+                config_network_name)VALUES('"+str(globais[24])+"','"+str(globais[26])+"','"+globais[5]+"','"+str(globais[3])+"','"+str(globais[1])+"',\
+                '"+str(globais[23])+"','"+str(globais[4])+"','"+str(globais[2])+"','"+str(globais[8])+"','"+str(globais[9])+"','"+str(globais[10])+"',\
+                '"+str(globais[11])+"','"+str(globais[12])+"','"+str(globais[14])+"','"+str(globais[15])+"','"+str(globais[16])+"',\
+                '/opt/docker/app/"+str(globais[1])+"','"+str(globais[13])+"',\
                 '/work:/opt/pgd/work;/binary:/opt/pgd/data/binary;/"+str(globais[1])+".jar;\
                 /opt/app/server/default/deploy/nuxeo.ear/plugins/"+str(globais[1])+".jar;\
                 /public/snx-public.war:/opt/app/server/default/deploy/snx-public.war;\
-                /home/cargas/"+str(globais[1])+":/carga','"+globais[17]+"','"+globais[18]+"','mongodb_mongodb-net');"
-
-        if portcontrol(InsertCfgQuery,True):
-            d.gauge_update(12, "Atualizado o banco de dados de controle")
-
-
-        d.gauge_update(15, "Criando usuario e banco de dados Postgres")
-
-        if create_user_database():
-            d.gauge_update(25, "Criado o usuario e o banco de dados postgres")
+                /home/cargas/"+str(globais[1])+":/carga','"+str(globais[17])+"','"+str(globais[18])+"','mongodb_mongodb-net') RETURNING config_id;"
         
-        d.gauge_update(28, "Criando usuario e banco de dados de preferencias MongoDB")
+        if portcontrol(InsertCfgQuery,True,False):
+            d.gauge_update(12, "Atualizado o banco de dados de controle",update_text=True)
+        
+        InsertPortQuery = "INSERT INTO portas (porta_servidor_id, porta_numero) VALUES ('"+str(globais[23])+"','"+str(globais[5])+"') RETURNING porta_id;"
+        
+        if portcontrol(InsertPortQuery,True,False):
+            d.gauge_update(14, "Atualizado o banco de dados de controle",update_text=True)
+            
+        d.gauge_update(15, "Criando usuario e banco de dados Postgres",update_text=True)
+        
+        if create_user_database():
+            d.gauge_update(25, "Criado o usuario e o banco de dados postgres",update_text=True)
+        
+        d.gauge_update(28, "Criando usuario e banco de dados de preferencias MongoDB",update_text=True)
 
         if create_mongo_db():
-            d.gauge_update(50, "Criado o usuario e o banco de dados de preferencias MongoDB")
+            d.gauge_update(50, "Criado o usuario e o banco de dados de preferencias MongoDB",update_text=True)
 
-        d.gauge_update(60, "Criando as pastas do Container do cliente")
+        d.gauge_update(60, "Criando as pastas do Container do cliente",update_text=True)
 
         if verifica_caminho():
-            d.gauge_update(75, "Criadas as pastas do Container do cliente")
+            d.gauge_update(75, "Criadas as pastas do Container do cliente",update_text=True)
 
-        d.gauge_update(80, "Criando o arquivo de configuracao do Container cliente")
+        d.gauge_update(80, "Criando o arquivo de configuracao do Container cliente",update_text=True)
 
         if cria_yml():
-            d.gauge_update(90, "Criado o arquivo de configuracao do Container cliente")
+            d.gauge_update(90, "Criado o arquivo de configuracao do Container cliente",update_text=True)
         
-        if portcontrol():
-            d.gauge_update(95, "Gravando valores em banco de dados")
+        #if portcontrol():
+        #    d.gauge_update(95, "Gravando valores em banco de dados")
 
-        d.gauge_update(98, "Iniciando os conteineres do cliente")
+        d.gauge_update(98, "Iniciando os conteineres do cliente",update_text=True)
 
-        d.gauge_update(100, "Configuracao finalizada")
+        d.gauge_update(100, "Configuracao finalizada",update_text=True)
         
         d.gauge_stop()
     else:

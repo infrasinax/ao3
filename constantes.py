@@ -2,7 +2,20 @@
 # -*- encoding: utf-8 -*-
 # -*- coding: utf-8 -*-
 
-###   ARRAY GLOBAL POS   ###
+##########################################################################################
+# -------------------------------------------------------------------------------------  #
+#     APLICAÇÃO PARA A CRIAÇÃO DE CONTAS E CONTÊINERES DOCKER PARA CLIENTES AO3 BPMS     #
+# -------------------------------------------------------------------------------------  #
+# Autor:      Cristiano de Morais Lima                                                   #
+# E-mail:     cristiano.lima@sinax.com.br                                                #
+# Data:       11 de Abril de 2018                                                        #
+# Versão:     1.0                                                                        #
+# Linguagem:  Python 2.0                                                                 #
+# Arquivo:    constantes.py                                                              #
+#                                                                                        #
+##########################################################################################
+
+####    ARRAY GLOBAL POS   ####
 # POS     NOME            TIPO
 # 0       nome            string
 # 1       login           string
@@ -30,9 +43,10 @@
 # 23      DbHostid        int
 # 24      ClienteDbid     int
 # 25      TipoServico     string
+# 26      AppHostId       string
 
 global globais
-globais = ["","","",0,"","","","","","","","","","",0,0,0,0,0,"",0,0,0,0,0,""]
+globais = ["","","",0,"","","","","","","","","","",0,0,0,0,0,"",0,0,0,0,0,"",0]
 
 
 def TipoOS():
