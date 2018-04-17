@@ -240,6 +240,7 @@ def create_mongo_db():
         banco = cliente[dbname]
 
         #Criação do usuário com acesso ao banco de dados
+        banco.command("use "+dbname)
         banco.command("createUser", globais[1], pwd=globais[2], roles=["readWrite"])
 
         #Salva a coleção (tabela) dpo
