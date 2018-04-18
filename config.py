@@ -40,7 +40,7 @@ d.set_background_title(Constantes.TXT_BACK_TITULO)
 
 def InitSetup():
     if TipoOS() == "Debian" and not isSudo():
-        d.infobox("O usuario atual nao tem permissao de execucao ."+'\n'+"Por favor, utilize o comando 'sudo python setup.py'",height=6, width=60)
+        d.infobox("O usuario atual nao tem permissao de execucao."+'\n'+"Por favor, utilize o comando 'sudo python config.py'",height=6, width=60)
     else:
         if d.yesno(Constantes.TXT_INIT, yes_label="Sim", no_label="Cancelar", width=40)== d.OK:
             SelectSize()
@@ -228,7 +228,7 @@ def MongoDatabase():
     
     suggesthost = "localhost"
     elements = [("Servidor: ",1,1,suggesthost,1,11,14,12)]
-    code, hostval = d.form("Informe o NOME do servidor de banco de dados Mongo.",elements, height=10, width=40)
+    code, hostval = d.form("Informe o NOME do servidor de banco de dados MongoDB.",elements, height=10, width=40)
     
     if code == d.OK:
 
@@ -246,6 +246,7 @@ def MongoDatabase():
         sair()
     else:
         sair()
+
 
 def Lastinfo():
     items = 0
@@ -382,10 +383,11 @@ def Configuracao():
         
         d.gauge_update(98, "Iniciando os conteineres do cliente",update_text=True)
 
-        if startUp():
-            d.gauge_update(100, "Configuracao finalizada",update_text=True)
+#        if startUp():
+        d.gauge_update(100, "Finalizando a configuracao",update_text=True)
         
         d.gauge_stop()
+        encerra()
     else:
         sair()
 
@@ -406,6 +408,13 @@ def sair():
 
         if globais[22] == 3:
             MongoDatabase()
+
+def encerra():
+    d.infobox("Criacao e Configuracao do cliente "+globais[1]+" executada com sucesso.",height=6, width=60)
+    time.sleep(0.5)
+    os.system('clear')
+    sys.exit(1)
+
 
 def main():
     locale.setlocale(locale.LC_ALL, '')

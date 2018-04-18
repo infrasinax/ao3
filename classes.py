@@ -221,9 +221,33 @@ def portcontrol(sqlQuery,Insere,RetornaID):
         if pconn is not None:
             pconn.close()
 
+#Função de Manipulação do Banco de dados para controle de portas em uso do pgd
+def checkClient(sqlQuery):
+    pconn = psycopg2.connect(host='10.51.1.14', database='ao3_bpms_cfg', user='ao3_user', password='48C0bIV3ho3I')
 
+    try:
+        pcur = pconn.cursor()
+        pcur.execute(sqlQuery)
+        pexec=pcur.fetchone()
 
-#Função para a criação da Base MongoDB
+        if not pexec:
+            return False
+        else:
+            return True
+
+    
+    except (Exception, psycopg2.DatabaseError) as error:
+        print('\n'+"Não foi possível executar a query abaixo: ")
+        print(sqlQuery)
+        print("MOTIVO:"+str(error))
+        sys.exit(1)
+        return False
+    
+    finally:
+        if pconn is not None:
+            pconn.close()
+
+#Função de criação de banco de dados MongoDB
 def create_mongo_db():
     
     #importa o módulo PyMongo
@@ -238,16 +262,14 @@ def create_mongo_db():
 
         #Criação\Conexão ao de dados
         banco = cliente[dbname]
-
+        colecao = banco[dbname]
+        
         #Criação do usuário com acesso ao banco de dados
         banco.command("createUser", globais[1], pwd=globais[2], roles=["readWrite"])
 
         #Salva a coleção (tabela) dpo
         criacao = banco.prefs
-        prefes = {
-                "user" : "pgd_user",
-                "readOnly" : "false",
-                "pwd" : "086a98b3ea8d989a7dd6be7752bf2d83"}
+        prefes = {"user" : "pgd_user","readOnly" : "false","pwd" : "086a98b3ea8d989a7dd6be7752bf2d83"}
         prefs_id = criacao.insert(prefes)
 
         if str(prefs_id) != "":
