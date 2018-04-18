@@ -330,7 +330,8 @@ def Configuracao():
         if createUser():
             d.gauge_update(10, "Usuario Linux criado",update_text=True)
         
-        InsertClienteQuery = "INSERT INTO clientes (cliente_nome, cliente_servidor_id, cliente_servico) VALUES ('"+str(globais[1])+"',"+str(globais[23])+",'"+str(globais[25])+"') RETURNING cliente_id;"
+        InsertClienteQuery = "INSERT INTO clientes (cliente_nome, cliente_servidor_id, cliente_servico) VALUES\
+                ('"+str(globais[1])+"',"+str(globais[23])+",'"+str(globais[25])+"') RETURNING cliente_id;"
         
         d.gauge_update(7, "Atualizado o banco de dados de controle",update_text=True)
 
@@ -353,7 +354,8 @@ def Configuracao():
         if portcontrol(InsertCfgQuery,True,False):
             d.gauge_update(12, "Atualizado o banco de dados de controle",update_text=True)
         
-        InsertPortQuery = "INSERT INTO portas (porta_servidor_id, porta_numero) VALUES ('"+str(globais[23])+"','"+str(globais[5])+"') RETURNING porta_id;"
+        InsertPortQuery = "INSERT INTO portas (porta_servidor_id, porta_numero,porta_cliente_id) VALUES\
+                ('"+str(globais[23])+"','"+str(globais[5])+"','"+str(globais[24])+"') RETURNING porta_id;"
         
         if portcontrol(InsertPortQuery,True,False):
             d.gauge_update(14, "Atualizado o banco de dados de controle",update_text=True)
@@ -378,12 +380,10 @@ def Configuracao():
         if cria_yml():
             d.gauge_update(90, "Criado o arquivo de configuracao do Container cliente",update_text=True)
         
-        #if portcontrol():
-        #    d.gauge_update(95, "Gravando valores em banco de dados")
-
         d.gauge_update(98, "Iniciando os conteineres do cliente",update_text=True)
 
-        d.gauge_update(100, "Configuracao finalizada",update_text=True)
+        if startUp():
+            d.gauge_update(100, "Configuracao finalizada",update_text=True)
         
         d.gauge_stop()
     else:

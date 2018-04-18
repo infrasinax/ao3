@@ -240,7 +240,6 @@ def create_mongo_db():
         banco = cliente[dbname]
 
         #Criação do usuário com acesso ao banco de dados
-        banco.command("use "+dbname)
         banco.command("createUser", globais[1], pwd=globais[2], roles=["readWrite"])
 
         #Salva a coleção (tabela) dpo
@@ -312,8 +311,9 @@ def testa_mongo_db():
 def create_pwd():
     try:
         if globais[0] != "" and globais[1] != "":
-            globais[2] = str(os.system("lpass generate --sync=auto --username="+globais[1]+" Shared-Servidores/CLIENTES/"+globais[0]+"/"+globais[1]+" 21"))
-            return True
+            if os.system("lpass login --trust -f "+"cristiano.lima@sinax.com.br") == 0:
+                globais[2] = str(os.popen("lpass generate --sync=auto --username="+globais[1]+" Shared-Servidores/CLIENTES/"+globais[0]+"/"+globais[1]+" 21").read().strip())
+                return True
     except:
         return False
 
@@ -324,7 +324,7 @@ def _ret_pwd():
         if globais[0] != "" and globais[1] != "":
             try:
                 os.system("lpass login --trust -f "+"cristiano.lima@sinax.com.br")
-                globais[2] = str(os.system("lpass show --password '"+globais[1]+"'"))
+                globais[2] = str(os.popen("lpass show --password '"+globais[1]+"'").read().strip())
                 return True
             except:
                 return False
@@ -387,3 +387,11 @@ def valida_integer(valor):
         return True
     except ValueError:
         return False
+
+
+#Inicialização do contêiner criado.
+def startUp():
+    os.system("cd /opt/docker/app/"+str(globais[1]))
+    os.system("docker-compose up -d")
+
+
