@@ -192,12 +192,12 @@ def PostgresDatabase():
     suggesthost = ""
 
     if globais[19] == "snx-apps-prod":
-        suggesthost = "10.51.1.12"
+        suggesthost = "10.51.1.11"
         globais[23] = 3
         globais[25] = "Produção"
         globais[26] = 1
     else:
-        suggesthost = "10.51.1.13"
+        suggesthost = "10.51.1.14"
         globais[23] = 4
         globais[25] = "Homologação"
         globais[26] = 2

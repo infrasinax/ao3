@@ -23,7 +23,7 @@ from pwd import getpwnam
 try:
     import psycopg2
 except:
-    if raw_input("Não encontrei o módulo Psycopg2. É necessário instalá-lo, prosseguir?"+'\n'+"Escreva 'sim' para instalar") == "sim":
+    if raw_input("Não encontrei o módulo Psycopg2. É necessário instalá-lo, prosseguir?"+'\n'+"Escreva 'sim' para instala-lo: ") == "sim":
         os.system("python -m pip install psycopg2")
     else:
         os.system('clear')
@@ -31,7 +31,7 @@ except:
 try:
     import pymongo
 except:
-    if raw_input("Não encontrei o módulo PyMongo. É necessário instalá-lo, prosseguir?"+'\n'+"Escreva 'sim' para instalar") == "sim":
+    if raw_input("Não encontrei o módulo PyMongo. É necessário instalá-lo, prosseguir?"+'\n'+"Escreva 'sim' para instala-lo: ") == "sim":
         os.system("python -m pip install pymongo")
     else:
         os.system('clear')
@@ -265,7 +265,7 @@ def create_mongo_db():
         colecao = banco[dbname]
         
         #Criação do usuário com acesso ao banco de dados
-        banco.command("createUser", globais[1], pwd=globais[2], roles=["readWrite"])
+        banco.command("createUser", str(globais[1]), pwd=str(globais[2]), roles=["readWrite"])
 
         #Salva a coleção (tabela) dpo
         criacao = banco.prefs
